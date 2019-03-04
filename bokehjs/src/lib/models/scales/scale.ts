@@ -39,6 +39,7 @@ export abstract class Scale extends Transform {
 
   abstract v_invert(sxs: Arrayable<number>): Arrayable<number>
 
+  // TODO - NEEDS TO BE CAREFUL AND THOUGHTFUL, THIS IS JUST A SIMPLE EXAMPLE
   screen_min(): number {
     return this.target_range.start
   }
