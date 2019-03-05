@@ -2,7 +2,7 @@ import {AbstractButton, AbstractButtonView} from "./abstract_button"
 import {CallbackLike1} from "../callbacks/callback"
 
 import {ButtonClick, MenuItemClick} from "core/bokeh_events"
-import {div, show, hide} from "core/dom"
+import {div, display, undisplay} from "core/dom"
 import * as p from "core/properties"
 import {isString} from "core/util/types"
 
@@ -16,19 +16,15 @@ export class DropdownView extends AbstractButtonView {
   render(): void {
     super.render()
 
-    if (!this.model.is_split) {
-      this.buttonEl.classList.add("bk-dropdown-toggle")
-      this.buttonEl.appendChild(div({class: "bk-caret"}))
-    } else {
-      const group = div({class: "bk-btn-group"})
-      this.el.appendChild(group)
+    const caret = div({class: ["bk-caret", "bk-down"]})
 
-      const caret = this._render_button(div({class: "bk-caret"}))
-      caret.classList.add("bk-dropdown-toggle")
-      caret.addEventListener("click", () => this._toggle_menu())
-
-      group.appendChild(this.buttonEl)
-      group.appendChild(caret)
+    if (!this.model.is_split)
+      this.button_el.appendChild(caret)
+    else {
+      const toggle = this._render_button(caret)
+      toggle.classList.add("bk-dropdown-toggle")
+      toggle.addEventListener("click", () => this._toggle_menu())
+      this.group_el.appendChild(toggle)
     }
 
     const items = this.model.menu.map((item, i) => {
@@ -44,13 +40,13 @@ export class DropdownView extends AbstractButtonView {
 
     this.menu = div({class: ["bk-menu", "bk-below"]}, items)
     this.el.appendChild(this.menu)
-    hide(this.menu)
+    undisplay(this.menu)
   }
 
   protected _show_menu(): void {
     if (!this._open) {
       this._open = true
-      show(this.menu)
+      display(this.menu)
 
       const listener = (event: MouseEvent) => {
         const {target} = event
@@ -66,7 +62,7 @@ export class DropdownView extends AbstractButtonView {
   protected _hide_menu(): void {
     if (this._open) {
       this._open = false
-      hide(this.menu)
+      undisplay(this.menu)
     }
   }
 

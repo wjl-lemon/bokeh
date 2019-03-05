@@ -27,6 +27,10 @@ export abstract class LayoutDOMView extends DOMView {
 
   protected _on_resize?: () => void
 
+  protected _offset_parent: Element | null = null
+
+  protected _parent_observer?: number
+
   protected _viewport: Partial<Size> = {}
 
   layout: Layoutable
@@ -51,13 +55,39 @@ export abstract class LayoutDOMView extends DOMView {
     if (this.is_root) {
       this._on_resize = () => this.resize_layout()
       window.addEventListener("resize", this._on_resize)
+
+      this._parent_observer = setInterval(() => {
+        const offset_parent = this.el.offsetParent
+
+        if (this._offset_parent != offset_parent) {
+          this._offset_parent = offset_parent
+
+          if (offset_parent != null) {
+            this.compute_viewport()
+            this.invalidate_layout()
+          }
+        }
+      }, 250)
     }
 
-    this.connect(this.model.properties.sizing_mode.change, () => this.invalidate_layout())
+    const p = this.model.properties
+    this.on_change([
+      p.width, p.height,
+      p.min_width, p.min_height,
+      p.max_width, p.max_height,
+      p.margin,
+      p.width_policy, p.height_policy, p.sizing_mode,
+      p.aspect_ratio,
+      p.visible, p.disabled,
+      p.background, p.css_classes,
+    ], () => this.invalidate_layout())
   }
 
   disconnect_signals(): void {
-    window.removeEventListener("resize", this._on_resize!)
+    if (this._parent_observer != null)
+      clearTimeout(this._parent_observer)
+    if (this._on_resize != null)
+      window.removeEventListener("resize", this._on_resize)
     super.disconnect_signals()
   }
 
@@ -122,6 +152,7 @@ export abstract class LayoutDOMView extends DOMView {
 
   renderTo(element: HTMLElement): void {
     element.appendChild(this.el)
+    this._offset_parent = this.el.offsetParent
     this.compute_viewport()
     this.build()
   }

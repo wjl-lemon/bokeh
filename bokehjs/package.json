@@ -1,6 +1,6 @@
 {
   "name": "bokehjs",
-  "version": "1.1.0dev3",
+  "version": "1.1.0dev8",
   "description": "Interactive, novel data visualization",
   "keywords": [
     "bokeh",
@@ -92,6 +92,6 @@
     "build": "node make build",
     "dev-build": "node make dev-build"
   },
-  "main": "build/js/tree/index.js",
+  "main": "build/js/lib/index.js",
   "types": "build/js/types/index.d.ts"
 }

@@ -66,6 +66,7 @@ export function createElement<T extends keyof HTMLElementTagNameMap>(tag: T,
 export const
   div      = _createElement("div"),
   span     = _createElement("span"),
+  canvas   = _createElement("canvas"),
   link     = _createElement("link"),
   style    = _createElement("style"),
   a        = _createElement("a"),
@@ -78,11 +79,7 @@ export const
   select   = _createElement("select"),
   option   = _createElement("option"),
   optgroup = _createElement("optgroup"),
-  textarea = _createElement("textarea"),
-  canvas   = _createElement("canvas"),
-  ul       = _createElement("ul"),
-  ol       = _createElement("ol"),
-  li       = _createElement("li")
+  textarea = _createElement("textarea")
 
 export function nbsp(): Text {
   return document.createTextNode("\u00a0")
@@ -116,12 +113,20 @@ export function empty(element: HTMLElement): void {
   }
 }
 
-export function show(element: HTMLElement): void {
+export function display(element: HTMLElement): void {
   element.style.display = ""
 }
 
-export function hide(element: HTMLElement): void {
+export function undisplay(element: HTMLElement): void {
   element.style.display = "none"
+}
+
+export function show(element: HTMLElement): void {
+  element.style.visibility = ""
+}
+
+export function hide(element: HTMLElement): void {
+  element.style.visibility = "hidden"
 }
 
 export function offset(element: HTMLElement) {
@@ -191,6 +196,13 @@ export function size(el: HTMLElement): Size {
   }
 }
 
+export function scroll_size(el: HTMLElement): Size {
+  return {
+    width: Math.ceil(el.scrollWidth),
+    height: Math.ceil(el.scrollHeight),
+  }
+}
+
 export function outer_size(el: HTMLElement): Size {
   const {margin: {left, right, top, bottom}} = extents(el)
   const {width, height} = size(el)
@@ -201,14 +213,14 @@ export function outer_size(el: HTMLElement): Size {
 }
 
 export function content_size(el: HTMLElement): Size {
+  const {left, top} = el.getBoundingClientRect()
   const {padding} = extents(el)
-  const left = Math.round(padding.left)
-  const top = Math.round(padding.top)
   let width = 0
   let height = 0
   for (const child of children(el)) {
-    width = Math.max(width, child.offsetLeft - left + child.offsetWidth)
-    height = Math.max(height, child.offsetTop - top + child.offsetHeight)
+    const rect = child.getBoundingClientRect()
+    width = Math.max(width, Math.ceil(rect.left - left - padding.left + rect.width))
+    height = Math.max(height, Math.ceil(rect.top - top - padding.top + rect.height))
   }
   return {width, height}
 }
@@ -317,8 +329,8 @@ export function unsized<T>(el: HTMLElement, fn: () => T): T {
 export function sized<T>(el: HTMLElement, size: Partial<Size>, fn: () => T): T {
   const {width, height, position} = el.style
   el.style.position = "absolute"
-  el.style.width = size.width != null && size.width != Infinity ? `${size.width}px` : ""
-  el.style.height = size.height != null && size.height != Infinity ? `${size.height}px` : ""
+  el.style.width = size.width != null && size.width != Infinity ? `${size.width}px` : "auto"
+  el.style.height = size.height != null && size.height != Infinity ? `${size.height}px` : "auto"
   try {
     return fn()
   } finally {

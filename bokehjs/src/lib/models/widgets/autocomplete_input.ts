@@ -1,6 +1,6 @@
 import {TextInput, TextInputView} from "./text_input"
 
-import {empty, show, hide, div, Keys} from "core/dom"
+import {empty, display, undisplay, div, Keys} from "core/dom"
 import * as p from "core/properties"
 
 export class AutocompleteInputView extends TextInputView {
@@ -13,15 +13,15 @@ export class AutocompleteInputView extends TextInputView {
   render(): void {
     super.render()
 
-    this.input.classList.add("bk-autocomplete-input")
+    this.input_el.classList.add("bk-autocomplete-input")
 
-    this.input.addEventListener("keydown", (event) => this._keydown(event))
-    this.input.addEventListener("keyup", (event) => this._keyup(event))
+    this.input_el.addEventListener("keydown", (event) => this._keydown(event))
+    this.input_el.addEventListener("keyup", (event) => this._keyup(event))
 
     this.menu = div({class: ["bk-menu", "bk-below"]})
     this.menu.addEventListener("click", (event) => this._menu_click(event))
     this.el.appendChild(this.menu)
-    hide(this.menu)
+    undisplay(this.menu)
   }
 
   protected _update_completions(completions: string[]): void {
@@ -36,7 +36,7 @@ export class AutocompleteInputView extends TextInputView {
   protected _show_menu(): void {
     if (!this._open) {
       this._open = true
-      show(this.menu)
+      display(this.menu)
 
       const listener = (event: MouseEvent) => {
         const {target} = event
@@ -52,14 +52,14 @@ export class AutocompleteInputView extends TextInputView {
   protected _hide_menu(): void {
     if (this._open) {
       this._open = false
-      hide(this.menu)
+      undisplay(this.menu)
     }
   }
 
   protected _menu_click(event: MouseEvent): void {
     if (event.target != event.currentTarget && event.target instanceof Element) {
-      this.input.value = event.target.textContent || ""
-      this.input.focus()
+      this.input_el.value = event.target.textContent || ""
+      this.input_el.focus()
       this._hide_menu()
     }
   }
@@ -82,7 +82,7 @@ export class AutocompleteInputView extends TextInputView {
         break
       }
       default: {
-        const value = this.input.value
+        const value = this.input_el.value
 
         if (value.length <= 1) {
           this._hide_menu()
