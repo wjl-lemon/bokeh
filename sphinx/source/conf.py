@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 #
 # Bokeh documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct 12 23:43:03 2013.
