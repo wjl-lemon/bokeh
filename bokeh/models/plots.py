@@ -40,6 +40,7 @@ from ..util.string import nice_join
 
 from .annotations import Legend, Title
 from .axes import Axis
+from .canvas import Scope
 from .glyphs import Glyph
 from .grids import Grid
 from .layouts import LayoutDOM
@@ -65,6 +66,9 @@ class Plot(LayoutDOM):
     ''' Model representing a plot, containing glyphs, guides, annotations.
 
     '''
+
+    def scope(self, **kwargs):
+        return Scope(**kwargs) # ??? outer=self.frame
 
     def select(self, *args, **kwargs):
         ''' Query this object and all of its references for objects that

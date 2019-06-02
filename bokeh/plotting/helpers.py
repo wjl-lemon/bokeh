@@ -795,6 +795,8 @@ def _add_sigfunc_info(func, argspecs, glyphclass, extra_docs):
 def _glyph_function(glyphclass, extra_docs=None):
 
     def func(self, **kwargs):
+        # Process rendering scope
+        scope = kwargs.pop('scope', None)
 
         # Convert data source, if necesary
         is_user_source = kwargs.get('source', None) is not None
@@ -860,7 +862,8 @@ def _glyph_function(glyphclass, extra_docs=None):
         hglyph = _make_glyph(glyphclass, kwargs, hglyph_ca)
         mglyph = _make_glyph(glyphclass, kwargs, mglyph_ca)
 
-        glyph_renderer = GlyphRenderer(glyph=glyph,
+        glyph_renderer = GlyphRenderer(scope=scope,
+                                       glyph=glyph,
                                        nonselection_glyph=nsglyph,
                                        selection_glyph=sglyph,
                                        hover_glyph=hglyph,

@@ -241,8 +241,8 @@ export class TileRendererView extends DataRendererView {
   _draw_tile(tile_key: string): void {
     const tile_obj = this.model.tile_source.tiles[tile_key] as TileData
     if (tile_obj != null) {
-      const [[sxmin], [symin]] = this.plot_view.map_to_screen([tile_obj.bounds[0]], [tile_obj.bounds[3]]) as any as [number[], number[]] // XXX: TS #20623
-      const [[sxmax], [symax]] = this.plot_view.map_to_screen([tile_obj.bounds[2]], [tile_obj.bounds[1]]) as any as [number[], number[]] //
+      const [[sxmin], [symin]] = this.scope.map_to_screen([tile_obj.bounds[0]], [tile_obj.bounds[3]]) as any as [number[], number[]] // XXX: TS #20623
+      const [[sxmax], [symax]] = this.scope.map_to_screen([tile_obj.bounds[2]], [tile_obj.bounds[1]]) as any as [number[], number[]] //
       const sw = sxmax - sxmin
       const sh = symax - symin
       const sx = sxmin

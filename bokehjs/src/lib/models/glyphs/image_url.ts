@@ -120,7 +120,7 @@ export class ImageURLView extends XYGlyphView {
 
     switch (this.model.properties.w.units) {
       case "data": {
-        this.sw = this.sdist(this.renderer.xscale, this._x, ws, "edge", this.model.dilate)
+        this.sw = this.sdist(this.renderer.scope.x_scale, this._x, ws, "edge", this.model.dilate)
         break
       }
       case "screen": {
@@ -131,7 +131,7 @@ export class ImageURLView extends XYGlyphView {
 
     switch (this.model.properties.h.units) {
       case "data": {
-        this.sh = this.sdist(this.renderer.yscale, this._y, hs, "edge", this.model.dilate)
+        this.sh = this.sdist(this.renderer.scope.y_scale, this._y, hs, "edge", this.model.dilate)
         break
       }
       case "screen": {
