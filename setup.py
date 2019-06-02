@@ -79,8 +79,8 @@ if os.environ.get('READTHEDOCS') == 'True':
     set_env_to_build_bokehjs()
 
 # immediately bail for ancient pythons
-if sys.version_info[:2] < (2, 7):
-    raise RuntimeError("Bokeh requires python >= 2.7")
+if sys.version_info[:2] < (3, 4):
+    raise RuntimeError("Bokeh requires python >= 3.5")
 
 # immediately handle lightweight "python setup.py --install-js"
 if len(sys.argv) == 2 and sys.argv[-1] == '--install-js':
@@ -101,10 +101,6 @@ REQUIRES = [
     'packaging >=16.8',
     'tornado >=5',
 ]
-
-# handle the compat difference for futures (meta.yaml handles differently)
-if sys.version_info[:2] == (2, 7):
-    REQUIRES.append('futures >=3.0.3')
 
 # if this is just conda-build skimming information, skip all this actual work
 if not conda_rendering():
