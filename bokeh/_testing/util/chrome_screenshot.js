@@ -99,9 +99,11 @@ CDP(async function(client) {
     errors.push({text, url, line: lineNumber+1, col: columnNumber+1, trace: collect_trace(stackTrace)})
   })
 
+  const jscss = /.*(js|css)$/
+
   Log.entryAdded(({entry}) => {
     const {source, level, text, url, lineNumber, stackTrace} = entry
-    if (source === "network" && level === "error") {
+    if (source === "network" && level === "error" && jscss.test(url)) {
       errors.push({level, text, url, line: lineNumber+1, col: 1, trace: collect_trace(stackTrace)})
     }
   })
