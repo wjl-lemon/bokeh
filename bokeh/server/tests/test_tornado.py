@@ -25,7 +25,7 @@ from bokeh.application import Application
 from bokeh.client import pull_session
 from bokeh.server.views.static_handler import StaticHandler
 
-from .utils import ManagedServerLoop, url, http_get
+from .utils import url, http_get
 
 # Module under test
 import bokeh.server.tornado as tornado
@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.DEBUG)
 # General API
 #-----------------------------------------------------------------------------
 
-def test_default_resources():
+def test_default_resources(ManagedServerLoop):
     application = Application()
     with ManagedServerLoop(application) as server:
         r = server._tornado.resources()
@@ -78,7 +78,7 @@ def test_default_resources():
         assert r.root_url == "/foo/bar/"
         assert r.path_versioner == StaticHandler.append_version
 
-def test_index():
+def test_index(ManagedServerLoop):
     application = Application()
     with ManagedServerLoop(application) as server:
         assert server._tornado.index is None
@@ -86,7 +86,7 @@ def test_index():
     with ManagedServerLoop(application, index='foo') as server:
         assert server._tornado.index == "foo"
 
-def test_prefix():
+def test_prefix(ManagedServerLoop):
     application = Application()
     with ManagedServerLoop(application) as server:
         assert server._tornado.prefix == ""
@@ -100,10 +100,10 @@ def test_websocket_max_message_size_bytes():
     t = tornado.BokehTornado({"/": app}, websocket_max_message_size_bytes=12345)
     assert t.settings['websocket_max_message_size'] == 12345
 
-def test_websocket_origins():
+def test_websocket_origins(ManagedServerLoop, unused_tcp_port):
     application = Application()
-    with ManagedServerLoop(application) as server:
-        assert server._tornado.websocket_origins == set(["localhost:5006"])
+    with ManagedServerLoop(application, port=unused_tcp_port) as server:
+        assert server._tornado.websocket_origins == set(["localhost:%s" % unused_tcp_port])
 
     # OK this is a bit of a confusing mess. The user-facing arg for server is
     # "allow_websocket_origin" which gets converted to "extra_websocket_origins"
@@ -131,7 +131,7 @@ def test_default_app_paths():
 # tried to use capsys to test what's actually logged and it wasn't
 # working, in the meantime at least this tests that log_stats
 # doesn't crash in various scenarios
-def test_log_stats():
+def test_log_stats(ManagedServerLoop):
     application = Application()
     with ManagedServerLoop(application) as server:
         server._tornado._log_stats()
@@ -147,7 +147,7 @@ def test_log_stats():
         server._tornado._log_stats()
 
 @pytest.mark.asyncio
-async def test_metadata():
+async def test_metadata(ManagedServerLoop):
     application = Application(metadata=dict(hi="hi", there="there"))
     with ManagedServerLoop(application) as server:
         meta_url = url(server) + 'metadata'
