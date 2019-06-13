@@ -64,17 +64,20 @@ from shutil import copy
 import os
 import sys
 
+# immediately bail on unsupported Python versions
+if sys.version_info[:2] < (3, 5):
+    raise RuntimeError("Bokeh requires python >= 3.5")
+
 from setuptools import find_packages, setup
 
 from _setup_support import (
     build_or_install_bokehjs, conda_rendering, fixup_building_sdist,
     fixup_for_packaged, get_cmdclass, get_package_data, get_version,
     install_js, package_files, package_path, ROOT, SERVER, show_bokehjs,
-    show_help
+    show_help, upgrade_npm, set_env_to_build_bokehjs
 )
 
 if os.environ.get('READTHEDOCS') == 'True':
-    from _setup_support import upgrade_npm, set_env_to_build_bokehjs
     upgrade_npm()
     set_env_to_build_bokehjs()
 
@@ -134,6 +137,7 @@ setup(
 
     # details needed by setup
     install_requires=REQUIRES,
+    python_requires=">=3.5",
     packages=find_packages(exclude=["scripts*", "tests*"]),
     package_data=get_package_data(),
     entry_points={'console_scripts': ['bokeh = bokeh.__main__:main',], },
