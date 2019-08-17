@@ -9,6 +9,7 @@ import * as combine from "combine-source-map"
 import * as convert from "convert-source-map"
 
 import {read, write, file_exists, directory_exists, rename} from "./sys"
+import {report_diagnostics} from "./compiler"
 import * as preludes from "./prelude"
 import * as transforms from "./transforms"
 
@@ -171,6 +172,7 @@ export interface LinkerOpts {
   externals?: string[] // modules: delegate to an external require()
   builtins?: boolean
   cache?: Path
+  transpile?: boolean
   minify?: boolean
 }
 
@@ -182,6 +184,7 @@ export class Linker {
   readonly builtins: boolean
   readonly cache_path?: Path
   readonly cache: Map<Path, ModuleArtifact>
+  readonly transpile: boolean
   readonly minify: boolean
 
   constructor(opts: LinkerOpts) {
@@ -213,6 +216,7 @@ export class Linker {
     this.cache = new Map()
     this.load_cache()
 
+    this.transpile = opts.transpile != null ? opts.transpile : false
     this.minify = opts.minify != null ? opts.minify : true
   }
 
@@ -292,7 +296,7 @@ export class Linker {
 
         let code: ModuleCode
         if (module.changed || (cached != null && deps_changed(module, cached.module))) {
-          const source = print(module)
+          const source = this.transpile ? transpile(module, print(module)).output : print(module)
           const minified = this.minify ? minify(module, source) : {min_source: source}
           code = {source, ...minified}
         } else
@@ -476,8 +480,8 @@ export class Linker {
   }
 
   private parse_module({file, source, type}: {file: Path, source: string, type: ModuleType}): ts.SourceFile {
-    const {ES5, JSON} = ts.ScriptTarget
-    return transforms.parse_es(file, source, type == "json" ? JSON : ES5)
+    const {ES2015, JSON} = ts.ScriptTarget
+    return transforms.parse_es(file, source, type == "json" ? JSON : ES2015)
   }
 
   new_module(file: Path): ModuleInfo {
@@ -592,6 +596,26 @@ export class Linker {
     }
 
     return [...reached.values()]
+  }
+}
+
+export function transpile(module: ModuleInfo, source: string): {output: string, error?: string} {
+  const result = ts.transpileModule(source, {
+    fileName: module.file,
+    reportDiagnostics: true,
+    compilerOptions: {
+      target: ts.ScriptTarget.ES5,
+      module: ts.ModuleKind.CommonJS,
+      importHelpers: true,
+    },
+  })
+
+  const {outputText, diagnostics} = result
+  if (diagnostics == null || diagnostics.length == 0)
+    return {output: outputText}
+  else {
+    const {text} = report_diagnostics(diagnostics)
+    return {output: outputText, error: text}
   }
 }
 
